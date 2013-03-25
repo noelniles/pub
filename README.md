@@ -6,7 +6,7 @@ Inpired by
 Create, edit and manage a blog, simply.
 
 *Dependencies:*<br>
-*-------------*
+*-------------*<br>
 BeautifulSoup: `sudo yum install python-BeautifulSoup`
 
 *Setup:*<br>
@@ -16,13 +16,13 @@ BeautifulSoup: `sudo yum install python-BeautifulSoup`
 
 
 *Usage:*<br>
-*------*
+*------*<br>
     - create a post -- create blog post and update index file</li>
          `pb.py -p`
     - edit a live post -- preserve timestamp while editing blog file</li>
          `pb.py -e 'name of existing file'`
 
-*TODO:*</b>
+*TODO:*<br>
     - massage documentation
     - use tempfiles
     - decouple
