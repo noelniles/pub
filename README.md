@@ -23,8 +23,8 @@ BeautifulSoup: `sudo yum install python-BeautifulSoup`
          `pb.py -e 'name of existing file'`
 
 *TODO:*<br>
-    - massage documentation
-    - use tempfiles
-    - decouple
-    - move strings to resource file
-    - SHIP IT!  
+    - massage documentation<br>
+    - use tempfiles<br>
+    - decouple<br>
+    - move strings to resource file<br>
+    - SHIP IT!<br>
