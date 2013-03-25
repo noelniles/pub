@@ -364,11 +364,10 @@ class Pub():
 
                 os.system(cmd)
                 
-                print ''.join(['saved your file to ',
-                               '/drafts/%s',
-                              ]) % (filename)
-
-                self.delete_includes()
+                print ' '.join(['saved your file to',
+                                
+                               '%s/drafts/%s',
+                              ]) % (os.getcwd(), filename)
                 break
             
             #Save post to posts folder
@@ -384,7 +383,6 @@ class Pub():
                 os.system(cmd)
 
                 print "blog posted"
-                self.delete_includes()
                 break
                    
             
@@ -397,7 +395,9 @@ class Pub():
         temporary_files = glob.iglob('*.html')
         
         for i in temporary_files:
-            os.remove(i)
+            #do not remove the archive file
+            if i is not self.ARCHIVE_INDEX:
+                os.remove(i)
             
     """
         Edits an html file keeping the original timestamp
@@ -440,6 +440,8 @@ class Pub():
         self.all_posts()
         #rebuild the index
         self.rebuild_index()
+        #delete the junk
+        self.delete_includes()
                                                   
     
 if __name__ == "__main__": 
