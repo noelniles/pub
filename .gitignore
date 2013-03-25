@@ -1,0 +1,11 @@
+# Ignore templates
+.header.html
+.footer.html
+.title.html
+*.html
+*.pyc
+*~
+
+#Ignore pub created dirs
+/posts
+/drafts
