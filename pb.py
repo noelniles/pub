@@ -14,7 +14,7 @@ from BeautifulSoup import BeautifulSoup as bs
     index and anything else that needs rebuilt.
     
     Dependencies:   
-    - python-BeautifulSoup: I will eventually include this when but for now you 
+    - python-BeautifulSoup: I will eventually include this, but for now you 
                             must install BeautifulSoup manually
     
     Files that this script generates(so far):
@@ -76,10 +76,12 @@ class Pub():
     """
     def rebuild_index(self):
         print 'rebuilding all entries(psych!)'
+        rstr = str(random.randint(1, 1000000))
+        new_index_file = '%s.%s' % (self.INDEX_FILE, rstr)
         #find the .html pages
         #don't index the index and archive pages
         #content = .tmp.random
-        #get the tittle and entry and rebuild from scratch
+        #get the title and entry and rebuild from scratch
         #create .html.rebuilt page
         #keep the original timestamp
         #chmod appropriately
@@ -103,9 +105,9 @@ class Pub():
             
         """
         print "creating an index"
-        prefix = str(random.randint(1, 100000))
+        prefix = str(random.randint(1, 1000000))
         filename = self.ARCHIVE_INDEX
-        tmp_filename = ''.join([prefix, filename, '.tmp'])
+        tmp_filename = '%s.%s.%s' % (prefix, filename, 'tmp')
         
         #find all of the post titles in the post dir
         posts = glob.iglob('posts/*.html')
@@ -123,9 +125,9 @@ class Pub():
                 titles = titles.next()
                 #clean up the title        
                 title.append(''.join(['<li><a href=%s/%s>%s',
-                                      '</a> &mdash;',
-                                      '</li>'
-                                     ]) % (self.BLOG_ADDR, v, titles))
+                                      '</a>&mdash;',
+                                      '</li>']) % (self.BLOG_ADDR, v, titles))
+
                                      
         #opening tags for the content
         
@@ -134,12 +136,15 @@ class Pub():
             content.append(''.join([title[i]]))
 
         #join the content with the closing tags
+        #TODO(noel): the link is created with a tmp file name that will
+        #            no longer exist. create_html_page should strip 
+        #            the prefix and '.tmp'
         content.append('</ul>')
         self.create_html_page(''.join(content), tmp_filename, 'no', 
                               self.BLOG_NAME+' all posts')
         
         #move tmp file to archive
-        os.system(' '.join(['mv ', tmp_filename, filename]))
+        os.system(('%s %s %s') % ('mv', tmp_filename, filename))
     
     def create_html_page(self, content, filename, index, new_title):
         """
@@ -357,6 +362,7 @@ class Pub():
                     os.mkdir(os.getcwd()+'/drafts', 0700)
 
                 #move the newly created file into drafts
+                #TODO(noel): add '.draft' to the filename
                 cmd = ''.join(['mv ',
                                '%s/%s ',
                                '%s/drafts/',
@@ -364,8 +370,7 @@ class Pub():
 
                 os.system(cmd)
                 
-                print ' '.join(['saved your file to',
-                                
+                print ' '.join(['saved your file to',                               
                                '%s/drafts/%s',
                               ]) % (os.getcwd(), filename)
                 break
@@ -396,7 +401,7 @@ class Pub():
         
         for i in temporary_files:
             #do not remove the archive file
-            if i is not self.ARCHIVE_INDEX:
+            if i != self.ARCHIVE_INDEX:
                 os.remove(i)
             
     """
@@ -443,7 +448,7 @@ class Pub():
         #delete the junk
         self.delete_includes()
                                                   
-    
+                                                      
 if __name__ == "__main__": 
     pub = Pub()
     pub.main()
