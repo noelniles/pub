@@ -66,6 +66,21 @@ class Pub():
     DATE_LOCALE = ""
     
     """
+        Check the $EDITOR variable.
+        
+        If the system editor is not set then fail horribly
+        
+    """
+    def check_editor(self):
+        #check if the editor is set
+        print 'checking setup'
+        if not os.getenv('EDITOR'):
+            print 'please set your $EDITOR variable'
+            sys.exit()
+        else:
+            print 'editor checks good'
+    
+    """
         List all of the posts
         
         
@@ -445,13 +460,7 @@ class Pub():
         os.utime(file_to_edit, (post_date.st_atime, post_date.st_mtime))
          
     def main(self):
-        #check if the editor is set
-        print 'checking setup'
-        if not os.getenv('EDITOR'):
-            print 'please set your $EDITOR variable'
-            sys.exit()
-        else:
-            print 'editor checks good'
+        self.check_editor()
         #Create includes
         self.create_includes()
         #Create parser for command line arguments
