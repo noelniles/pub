@@ -68,7 +68,7 @@ class Pub():
     """
         Check the $EDITOR variable.
         
-        If the system editor is not try to use vim; otherwise give up
+        If the system editor is not set try to use vim; otherwise give up
         
     """
     def check_editor(self):
