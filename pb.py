@@ -20,6 +20,7 @@ from BeautifulSoup import BeautifulSoup as bs
     
     Files that this script generates(so far):
     - all_posts.html
+    - index.html 
     - one html file for each post; these are stored in '/posts/'
     - a bunch of tmp files that are eventually deleted
     
@@ -62,12 +63,31 @@ class Pub():
     #The locale and format used for the date
     DATE_FORMAT = "%a, %d %b %Y %H:%M"
     DATE_LOCALE = ""
+    
     """
-        rebuild the index
+        List all of the posts
+        
+        
+    """
+    def list_posts(self):
+        posts = os.listdir('posts')
+        
+        for post in posts:
+            print post
+                
+    """
+        Rebuild the index.
+        
+        Build a new index.html file when a new post is made 
         
         Vars:
-        content -- the actual post in between the entry begin and entry end 
-                   tags 
+        content        -- the actual post in between the entry begin and entry end 
+                          tags
+        new_index_file -- temporary index file
+        content_list   -- list containing all of the post content
+        post_dir       -- directory that contains all of the posts '/posts/'
+        
+        TODO(noel): Sort the posts by date. chmod? 
         
     """
     def rebuild_index(self):
@@ -90,16 +110,6 @@ class Pub():
         self.create_html_page(content_list, new_index_file, 'no', self.BLOG_NAME)
         
         os.system('%s %s %s' % ('mv', new_index_file, self.INDEX_FILE))
-                
-
-        #don't index the index and archive pages
-        #content = .tmp.random
-        #get the title and entry and rebuild from scratch
-        #create .html.rebuilt page
-        #keep the original timestamp
-        #chmod appropriately
-        #rm the leftovers
-        
     
     def all_posts(self):
         """
@@ -226,7 +236,6 @@ class Pub():
             Build the html page.
         
             All of the strings are ready to be put into BeautifulSoup.
-            Called by create_includes().
             
             Variables:
             header_str -- string that comes from '.header.html' file
@@ -261,6 +270,7 @@ class Pub():
                           ]) % locals()).prettify()
 
         #write the html file
+        
         with open(filename, "w+") as hf: #[h]tml [f]ile
             hf.write(html)    
            
@@ -308,6 +318,7 @@ class Pub():
                              ]) % locals()
         
         #write header, footer and title templates
+        
         with open('.title.html', 'w+') as title_file:
             title_file.write(title_str)
         with open('.header.html', 'w+') as header_file:
@@ -349,8 +360,12 @@ class Pub():
                     #content or body is the rest
                     content = f.read()
             
-                #change the filename to the title string with underscores   
-                filename = title.replace(' ', '_').strip().lower()+'.html'
+                #change the filename to the title string with underscores
+                #clean the filename so bash doesn't give up'
+                filename = title.replace(' ', '_').strip().lower()
+                pat = re.compile('[^\w\s]+')
+                filename = pat.sub('_', filename)
+                filename += '.html'
             
                 #create the html page
                 self.create_html_page(content, filename, 'no', title) 
@@ -412,12 +427,12 @@ class Pub():
         temporary_files = glob.iglob('*.html')
         
         for i in temporary_files:
-            #do not remove the archive file
+            #do not remove the archive file or the index file
             if i != self.ARCHIVE_INDEX and i != self.INDEX_FILE:
                 os.remove(i)
             
     """
-        Edits an html file keeping the original timestamp
+        Edit an html file keeping the original timestamp
         
     """        
     def edit_html(self, file_to_edit):
@@ -443,6 +458,9 @@ class Pub():
         parser.add_argument('-p', '--post', action='store_true',
                             help='''insert a new blog post or the FILENAME of 
                                     a draft to continue editing it.''')
+        
+        parser.add_argument('-l', '--list', action='store_true',
+                            help="""List all the the live posts""")
                     
         self.args = parser.parse_args()
         
@@ -452,11 +470,14 @@ class Pub():
             
         if self.args.post:
             self.write_entry('E')
+            #Generate an html page with all of the posts
+            self.all_posts()
+            #rebuild the index
+            self.rebuild_index()
+            
+        if self.args.list:
+            self.list_posts()
         
-        #Generate an html page with all of the posts
-        self.all_posts()
-        #rebuild the index
-        self.rebuild_index()
         #delete the junk
         self.delete_includes()
                                                   
