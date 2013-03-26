@@ -444,6 +444,12 @@ class Pub():
         os.utime(file_to_edit, (post_date.st_atime, post_date.st_mtime))
          
     def main(self):
+        #check if the editor is set
+        print 'checking setup'
+        if not os.getenv('EDITOR'):
+            print 'please set your $EDITOR variable'
+        else:
+            print 'editor checks good'
         #Create includes
         self.create_includes()
         #Create parser for command line arguments
