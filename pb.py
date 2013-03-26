@@ -6,7 +6,7 @@ import random
 import re
 import time
 import webbrowser
-from BeautifulSoup import BeautifulSoup as bs
+from bs4 import BeautifulSoup as bs
 
 """pub is inspired by bashblog, a program written by Carles Fenolosa.
 
@@ -272,7 +272,7 @@ class Pub():
         #write the html file
         
         with open(filename, "w+") as hf: #[h]tml [f]ile
-            hf.write(html)    
+            hf.write(html.encode('utf-8'))    
            
     """ 
         Create_includes
