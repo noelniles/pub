@@ -448,6 +448,7 @@ class Pub():
         print 'checking setup'
         if not os.getenv('EDITOR'):
             print 'please set your $EDITOR variable'
+            sys.exit()
         else:
             print 'editor checks good'
         #Create includes
