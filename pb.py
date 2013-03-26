@@ -3,6 +3,7 @@ import argparse
 import glob
 import os
 import random
+import re
 import time
 import webbrowser
 from BeautifulSoup import BeautifulSoup as bs
@@ -41,21 +42,14 @@ class Pub():
     AUTH_ADDR = "http://authors_address.com"
     AUTH_MAIL = "author@email.com"
     #Licensing and stuff
-    LICENSE = "GPLv3000"
-    #Google Analytics
-    GANALYTICS = "false"
-    #Feedburner info"""
-    FEEDBURNER = ""
-    #Twitter info
-    TWITTER = "false"   
-    TWITTER_NAME = "shakabra"
+    LICENSE = "GPLv3000"  
     #Blog generated files
     INDEX_FILE = "index.html"
     NUMBER_OF_INDEX_ARTICLES = "8"
     ARCHIVE_INDEX = "all_posts.html"
     BLOG_FEED = "feed.rss"
     #Localization an i18n
-    #Used in twitter link after every post
+    #Used in link after every post
     TEMPLATE_COMMENTS = "Comments?"
     #Used on the bottom of every page to link to archive
     TEMPLATE_ARCHIVE = "View more posts?"
@@ -65,20 +59,39 @@ class Pub():
     TEMPLATE_SUBSCRIBE = "Subsribe?"
     #Used as text for browser feed button that is embedded to html
     TEMPLATE_SUBSCIRBE_BROWSER_BUTTON = "Subscribe to this page?..."
-    #Used as twitter text button for posting to twitter
-    TEMPLATE_TWITTER_BUTTON = "Tweet"
     #The locale and format used for the date
     DATE_FORMAT = "%a, %d %b %Y %H:%M"
     DATE_LOCALE = ""
     """
         rebuild the index
         
+        Vars:
+        content -- the actual post in between the entry begin and entry end 
+                   tags 
+        
     """
     def rebuild_index(self):
-        print 'rebuilding all entries(psych!)'
+        print 'rebuilding the index'
         rstr = str(random.randint(1, 1000000))
         new_index_file = '%s.%s' % (self.INDEX_FILE, rstr)
-        #find the .html pages
+        content_list = []
+        
+        #all of the posts
+        posts_dir = glob.iglob('posts/*.html')
+        
+        for i in posts_dir:
+            with (open(i)) as post_file:
+                post_html = post_file.read()
+                content = re.search(ur'<!-- entry begin -->(.*?)<!-- entry end -->', post_html, re.DOTALL)
+                if content:
+                    content_list.append(content.group(1))
+        
+        content_list = ''.join(content_list)       
+        self.create_html_page(content_list, new_index_file, 'no', self.BLOG_NAME)
+        
+        os.system('%s %s %s' % ('mv', new_index_file, self.INDEX_FILE))
+                
+
         #don't index the index and archive pages
         #content = .tmp.random
         #get the title and entry and rebuild from scratch
@@ -127,8 +140,7 @@ class Pub():
                 title.append(''.join(['<li><a href=%s/%s>%s',
                                       '</a>&mdash;',
                                       '</li>']) % (self.BLOG_ADDR, v, titles))
-
-                                     
+                                    
         #opening tags for the content
         
         content.append('<h3>All Posts</h3><ul>')  
@@ -401,7 +413,7 @@ class Pub():
         
         for i in temporary_files:
             #do not remove the archive file
-            if i != self.ARCHIVE_INDEX:
+            if i != self.ARCHIVE_INDEX and i != self.INDEX_FILE:
                 os.remove(i)
             
     """
