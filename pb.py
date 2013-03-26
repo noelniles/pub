@@ -322,8 +322,8 @@ class Pub():
                    
         header_str = ''.join(['<!DOCTYPE html>',
                               '<head>',
-                              '<meta http-equiv="Content-type',
-                              'content="text/html;charset=UTF-8" />',
+                              '<meta http-equiv="Content-type"',
+                              'content="text/html;charset=utf-8" />',
                               '<link rel="stylesheet" href="main.css"',
                               'type="text/css" />',
                               '<link rel="stylesheet" href="blog.css"',
