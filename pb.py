@@ -68,7 +68,7 @@ class Pub():
     """
         Check the $EDITOR variable.
         
-        If the system editor is not set then fail horribly
+        If the system editor is not try to use vim; otherwise give up
         
     """
     def check_editor(self):
@@ -76,14 +76,19 @@ class Pub():
         print 'checking setup'
         if not os.getenv('EDITOR'):
             print 'please set your $EDITOR variable'
-            sys.exit()
+            wanna_use_vim = raw_input('want to use vim? [Y]es or [N]o')
+            if wanna_use_vim.upper() == 'Y':
+                os.environ['EDITOR'] = 'vim'
+            else:
+                print 'OK, no more suit yourself\n'
+                print 'leaving pub'
+                sys.exit()
         else:
             print 'editor checks good'
     
     """
         List all of the posts
-        
-        
+               
     """
     def list_posts(self):
         posts = os.listdir('posts')
