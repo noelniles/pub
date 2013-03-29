@@ -6,6 +6,7 @@ import random
 import re
 import sys
 import time
+from datetime import date
 import webbrowser
 from bs4 import BeautifulSoup as bs
 
@@ -133,7 +134,7 @@ class Pub():
     
     def sort_ls(self, path):
         mtime = lambda f: os.stat(os.path.join(path, f)).st_mtime
-        return list(sorted(os.listdir(path), key=mtime))
+        return list(sorted(os.listdir(path), key=mtime, reverse=True))
 
     def all_posts(self):
         """
@@ -164,6 +165,11 @@ class Pub():
         #get all of the titles 
         for v in self.sort_ls('posts/'):
             with open(os.getcwd()+'/posts/'+v) as post:
+                #get the date
+                stat = os.stat(os.getcwd()+'/posts/'+v)
+                udate = stat.st_mtime
+                #convert the date to pretty date
+                hdate = date.fromtimestamp(udate)
                 text = post.read()
                 soup = bs(''.join(text))
                 ttag = soup.title
@@ -172,8 +178,9 @@ class Pub():
                 titles = titles.next()
                 #clean up the title        
                 title.append(''.join(['<li><a href=%s/%s>%s',
-                                      '</a>&mdash;',
-                                      '</li>']) % (self.BLOG_ADDR, v, titles))
+                                      '</a>&mdash;%s',
+                                      '</li>']) % (self.BLOG_ADDR, v, 
+                                                   titles, hdate))
                                     
         #opening tags for the content
         
