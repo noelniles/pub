@@ -119,7 +119,6 @@ class Pub():
         
         #all of the posts
         posts_dir = glob.iglob('posts/*.html')
-        
         for i in posts_dir:
             with (open(i)) as post_file:
                 post_html = post_file.read()
@@ -371,11 +370,12 @@ class Pub():
             
             #Edit the post
             if post_status.upper() == 'E':
-                #edit the file passed on the command line
+                #edit the file 
                 editor = str(os.getenv('EDITOR'))
-                os.system(editor +" " + os.getcwd() +'/'+ tmp_file)
+                os.system('%s %s/%s' % (editor, os.getcwd(), tmp_file))
+
                 #get title from first line of file
-                with open(os.getcwd()+'/'+tmp_file) as f:
+                with open(tmp_file) as f:
                     #title is the first line
                     title = f.readline()
                     #content or body is the rest
@@ -385,7 +385,7 @@ class Pub():
                 #clean the filename so bash doesn't give up'
                 filename = title.replace(' ', '_').strip().lower()
                 pat = re.compile('[^\w\s]+')
-                filename = pat.sub('_', filename)
+                filename = pat.sub('', filename)
                 filename += '.html'
             
                 #create the html page
@@ -395,9 +395,8 @@ class Pub():
                                     '[y]yes or [n]no\n')
             
                 if preview.upper() == 'Y':
-                    preview_filename = ''.join(['file:///'
-                                                '%s/%s',
-                                                ]) % (os.getcwd(),filename)
+                    preview_filename = 'file:///%s/%s' % (os.getcwd(),
+                                                          filename)
 
                     webbrowser.open_new_tab(preview_filename)
                 
