@@ -26,12 +26,39 @@ from bs4 import BeautifulSoup as bs
     - one html file for each post; these are stored in '/posts/'
     - a bunch of tmp files that are eventually deleted
     
-    There are a lot of loops on '*.html' so keep everything else out of this 
-    dir. Be careful to write valid html!
+    There are a lot of loops on '*.html' so keep everything else out of 
+    this dir. Be careful to write valid html!
 
 """
 class Pub():
 
+    def rebuild_css(self):
+        """Rebuilds the href attribute
+            
+            This is used when the css changes.
+
+        """
+        print 'rebuilding css'
+        oldfiles = os.listdir('posts/')
+        for oldfile in oldfiles:
+            abs_oldfile = '%s/%s/%s' % (os.getcwd(),'posts', oldfile)
+            newfilename = '%s.rebuilt' % abs_oldfile
+            print 'made new filename' + newfilename
+
+            stats = os.stat(abs_oldfile)
+            oldtime = (stats.st_atime, stats.st_mtime)
+            with open(abs_oldfile) as text:
+                print 'opened' + oldfile
+                soup = bs(text)
+                tag = soup.link
+                tag['href'] = '%s/%s' % (self.CSS_DIR, self.CSS_FILE)
+
+                with open(newfilename, 'w+') as newfile:
+                    newfile.write(soup.encode("ascii"))
+                    print 'wrote' + newfilename
+                os.system('%s %s %s' % ('mv', newfilename, abs_oldfile))
+                os.utime(abs_oldfile, (stats.st_atime, stats.st_mtime))
+                print 'preserved timestamp for' + abs_oldfile
 
     #Define some constants.
     SOFTWARE_NAME = "pub" 
@@ -58,21 +85,21 @@ class Pub():
     TEMPLATE_ARCHIVE = "View more posts?"
     #link back to the blog index
     TEMPLATE_ARCHIVE_INDEX_PAGE = "Back to the blog index?"
-    #Used on the bottom of index page. It is link to RSS feed
-    TEMPLATE_SUBSCRIBE = "Subsribe?"
-    #Used as text for browser feed button that is embedded to html
-    TEMPLATE_SUBSCIRBE_BROWSER_BUTTON = "Subscribe to this page?..."
     #The locale and format used for the date
     DATE_FORMAT = "%a, %d %b %Y %H:%M"
     DATE_LOCALE = ""
-    
-    """
-        Check the $EDITOR variable.
-        
-        If the system editor is not set try to use vim; otherwise give up
-        
-    """
+    #Location of css files
+    CSS_DIR = '%s/%s' % (os.getcwd(), 'res/css')
+    CSS_FILE = 'Toast/toast.css'
     def check_editor(self):
+
+        """
+            Check the $EDITOR variable.
+            
+            If the system editor is not set try to use vim; otherwise give 
+            up
+            
+        """
         #check if the editor is set
         print 'checking setup'
         if not os.getenv('EDITOR'):
@@ -87,32 +114,36 @@ class Pub():
         else:
             print 'editor checks good'
     
-    """
-        List all of the posts
-               
-    """
     def list_posts(self):
+
+        """
+            List all of the posts
+                   
+        """
         posts = os.listdir('posts')
         
         for post in posts:
             print post
                 
-    """
-        Rebuild the index.
-        
-        Build a new index.html file when a new post is made 
-        
-        Vars:
-        content        -- the actual post in between the entry begin and entry end 
-                          tags
-        new_index_file -- temporary index file
-        content_list   -- list containing all of the post content
-        post_dir       -- directory that contains all of the posts '/posts/'
-        
-        TODO(noel): Sort the posts by date. chmod? 
-        
-    """
     def rebuild_index(self):
+
+        """
+            Rebuild the index.
+            
+            Build a new index.html file when a new post is made 
+            
+            Vars:
+            content        -- the actual post in between the entry begin 
+                              and 
+                              entry end tags
+            new_index_file -- temporary index file
+            content_list   -- list containing all of the post content
+            post_dir       -- directory that contains all of the posts '/ 
+                              posts/'
+            
+            TODO(noel): chmod? 
+            
+        """
         print 'rebuilding the index'
         rstr = str(random.randint(1, 1000000))
         new_index_file = '%s.%s' % (self.INDEX_FILE, rstr)
@@ -131,8 +162,9 @@ class Pub():
                               BLOG_NAME)
         
         os.system('%s %s %s' % ('mv', new_index_file, self.INDEX_FILE))
-    
+
     def sort_ls(self, path):
+        """Sort path by reverse mtime, newest first"""
         mtime = lambda f: os.stat(os.path.join(path, f)).st_mtime
         return list(sorted(os.listdir(path), key=mtime, reverse=True))
 
@@ -152,7 +184,7 @@ class Pub():
             titles       -- itertable of tlst
             
         """
-        print "creating an "
+        print "creating an archive "
         prefix = str(random.randint(1, 1000000))
         filename = self.ARCHIVE_INDEX
         tmp_filename = '%s.%s.%s' % (prefix, filename, 'tmp')
@@ -167,21 +199,27 @@ class Pub():
             with open(os.getcwd()+'/posts/'+v) as post:
                 #get the date
                 stat = os.stat(os.getcwd()+'/posts/'+v)
-                udate = stat.st_mtime
-                #convert the date to pretty date
-                hdate = date.fromtimestamp(udate)
-                text = post.read()
-                soup = bs(''.join(text))
-                ttag = soup.title
-                tlst = ttag.contents
-                titles = iter(tlst)
-                titles = titles.next()
-                #clean up the title        
-                title.append(''.join(['<li><a href=%s/%s>%s',
-                                      '</a>&mdash;%s',
-                                      '</li>']) % (self.BLOG_ADDR, v, 
-                                                   titles, hdate))
-                                    
+                #make sure the file is not empty
+                #if it is we have big problems
+                if stat.st_size != 0:
+                    print v
+                    udate = stat.st_mtime
+                    #convert the date to pretty date
+                    hdate = date.fromtimestamp(udate)
+                    text = post.read()
+                    soup = bs(''.join(text))
+                    ttag = soup.title
+                    tlst = ttag.contents
+                    print tlst
+                    titles = iter(tlst)
+                    titles = titles.next()
+                    #clean up the title        
+                    title.append(''.join(['<li><a href=%s/%s>%s',
+                                          '</a>&mdash;%s',
+                                          '</li>']) % (self.BLOG_ADDR, v, 
+                                                       titles, hdate))
+                else:
+                    print 'you have an empty file in posts'
         #opening tags for the content
         
         content.append('<h3>All Posts</h3><ul>')  
@@ -199,7 +237,8 @@ class Pub():
         #move tmp file to archive
         os.system(('%s %s %s') % ('mv', tmp_filename, filename))
     
-    def create_html_page(self, content, filename, index, new_title):
+    def create_html_page(self, content, filename, index, new_title, when_created=False):
+
         """
             Create an html page.
     
@@ -301,22 +340,24 @@ class Pub():
                           ]) % locals()).prettify()
 
         #write the html file
-        
         with open(filename, "w+") as hf: #[h]tml [f]ile
-            hf.write(html.encode('utf-8'))    
+            hf.write(html.encode('utf-8'))
+            if when_created:
+                stat = os.stat(filename)
+                os.utime(filename, (stat.st_atime, stat_st_mtime))
            
-    """ 
-        Create_includes
-        
-        Creates the temp files that are used as the title 
-        header and footer
-        
-        TODO(noel): - Get rid of those useles vars and fix the strings. 
-                    - Write the files in a loop.
-               
-    """
     def create_includes(self):
     
+        """ 
+            Create_includes
+            
+            Creates the temp files that are used as the title 
+            header and footer
+            
+            TODO(noel): - Get rid of those useles vars and fix the strings. 
+                        - Write the files in a loop.
+                   
+        """
         blog_addr = self.BLOG_ADDR
         blog_name = self.BLOG_NAME
         license = self.LICENSE
@@ -334,11 +375,11 @@ class Pub():
                               '<head>',
                               '<meta http-equiv="Content-type"',
                               'content="text/html;charset=utf-8" />',
-                              '<link rel="stylesheet" href="main.css"',
+                              '<link rel="stylesheet" href="%s/%s"',
                               'type="text/css" />',
                               '<link rel="stylesheet" href="blog.css"',
                               'type="text/css" />',
-                             ])
+                             ]) % (self.CSS_DIR, self.CSS_FILE)
                   
         footer_str = ''.join(['<div id="footer">%(license)s',
                               '<a href="%(auth_addr)s">',
@@ -356,15 +397,14 @@ class Pub():
             header_file.write(header_str)
         with open('.footer.html', 'w+') as footer_file:
             footer_file.write(footer_str)
-    
-    """
-       Write entry manges the creation of html file
-       
-       TODO(noel): This might be kind of smelly
-       
-    """
     def write_entry(self, post_status):
         
+        """
+           Write entry manges the creation of html file
+           
+           TODO(noel): This might be kind of smelly
+           
+        """
         tmp_str = ''.join(['title on this line(do not use apostophies!)\n',
                            '<p>The rest of the text file is an',
                            '<b>html</b>', 
@@ -447,27 +487,24 @@ class Pub():
 
                 print "blog posted"
                 break
-                   
-            
-    """
-        Delete the tempory files
-        
-    """
     def delete_includes(self):
     
-        temporary_files = glob.iglob('*.html')
-        
+        """
+            Delete the tempory files
+            
+        """
+        temporary_files = glob.iglob('.*.html')
         for i in temporary_files:
             #do not remove the archive file or the index file
             if i != self.ARCHIVE_INDEX and i != self.INDEX_FILE:
                 os.remove(i)
             
-    """
-        Edit an html file keeping the original timestamp
-        
-    """        
     def edit_html(self, file_to_edit):
     
+        """
+            Edit an html file keeping the original timestamp
+            
+        """        
         post_date = os.stat(os.getcwd()+'/'+file_to_edit)
         editor = str(os.getenv('EDITOR'))
         
@@ -494,6 +531,9 @@ class Pub():
         parser.add_argument('-l', '--list', action='store_true',
                             help="""List all the the live posts""")
                     
+        parser.add_argument('-r', '--rebuild', action='store_true',
+                            help="""rebuild css""")
+
         self.args = parser.parse_args()
         
         if self.args.edit:
@@ -506,7 +546,8 @@ class Pub():
             self.all_posts()
             #rebuild the index
             self.rebuild_index()
-            
+        if self.args.rebuild:
+            self.rebuild_css()
         if self.args.list:
             self.list_posts()
         
