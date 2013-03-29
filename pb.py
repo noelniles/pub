@@ -116,24 +116,28 @@ class Pub():
         rstr = str(random.randint(1, 1000000))
         new_index_file = '%s.%s' % (self.INDEX_FILE, rstr)
         content_list = []
-        
+
         #all of the posts
-        posts_dir = glob.iglob('posts/*.html')
-        for i in posts_dir:
-            with (open(i)) as post_file:
+        for i in self.sort_ls('posts/'):
+            with (open(os.getcwd()+'/posts/'+i)) as post_file:
                 post_html = post_file.read()
                 content = re.search(ur'<!-- entry begin -->(.*?)<!-- entry end -->', post_html, re.DOTALL)
                 if content:
                     content_list.append(content.group(1))
         
         content_list = ''.join(content_list)       
-        self.create_html_page(content_list, new_index_file, 'no', self.BLOG_NAME)
+        self.create_html_page(content_list, new_index_file, 'no', self.
+                              BLOG_NAME)
         
         os.system('%s %s %s' % ('mv', new_index_file, self.INDEX_FILE))
     
+    def sort_ls(self, path):
+        mtime = lambda f: os.stat(os.path.join(path, f)).st_mtime
+        return list(sorted(os.listdir(path), key=mtime))
+
     def all_posts(self):
         """
-            Create index page with all of the posts.
+            Create archive all_posts.html page with all of the posts.
             
             Vars:
             filename     -- string; archive file
@@ -147,7 +151,7 @@ class Pub():
             titles       -- itertable of tlst
             
         """
-        print "creating an index"
+        print "creating an "
         prefix = str(random.randint(1, 1000000))
         filename = self.ARCHIVE_INDEX
         tmp_filename = '%s.%s.%s' % (prefix, filename, 'tmp')
@@ -158,8 +162,8 @@ class Pub():
         content = []
         
         #get all of the titles 
-        for i, v in enumerate(posts):
-            with open(v) as post:
+        for v in self.sort_ls('posts/'):
+            with open(os.getcwd()+'/posts/'+v) as post:
                 text = post.read()
                 soup = bs(''.join(text))
                 ttag = soup.title
