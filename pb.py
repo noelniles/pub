@@ -59,7 +59,7 @@ class Pub():
     DATE_FORMAT = "%a, %d %b %Y %H:%M"
     DATE_LOCALE = ""
     #Location of css files
-    CSS_DIR = '%s/%s' % (os.getcwd(), 'res/css')
+    CSS_DIR = '%s/%s' % (BLOG_ADDR, 'res/css')
     CSS_FILE = 'Toast/toast.css'
 
     def rebuild_css(self):
@@ -357,37 +357,25 @@ class Pub():
                         - Write the files in a loop.
                    
         """
-        blog_addr = self.BLOG_ADDR
-        blog_name = self.BLOG_NAME
-        license = self.LICENSE
-        auth_addr = self.AUTH_ADDR
-        author = self.AUTH_NAME
-        safe_mail = self.AUTH_MAIL
-        
-        title_str = ''.join(['<h1 class="nomargin">',
-                             '<a class="ablack"',
-                             'href="%(blog_addr)s">%(blog_name)s</a>',
-                             '</h1>',
-                            ]) % locals()
+        title_str = ('<h1 class="nomargin">'
+                     '<a class="ablack" href="%s">%s</a>'
+                     '</h1>' % (self.BLOG_ADDR, self.BLOG_NAME))
+
                    
-        header_str = ''.join(['<!DOCTYPE html>',
-                              '<head>',
-                              '<meta http-equiv="Content-type"',
-                              'content="text/html;charset=utf-8" />',
-                              '<link rel="stylesheet" href="%s/%s"',
-                              'type="text/css" />',
-                              '<link rel="stylesheet" href="blog.css"',
-                              'type="text/css" />',
-                             ]) % (self.CSS_DIR, self.CSS_FILE)
-                  
-        footer_str = ''.join(['<div id="footer">%(license)s',
-                              '<a href="%(auth_addr)s">',
-                              '%(author)s</a> &mdash;',
-                              '<a href="mailto:'
-                              '%(safe_mail)s">%(safe_mail)s</a>',
-                              '</div>'
-                             ]) % locals()
-        
+        header_str = ('<!DOCTYPE html>'
+                      '<head>'
+                      '<meta http-equiv="Content-type"'
+                      'content="text/html;charset=utf-8" />'
+                      '<link rel="stylesheet" href="%s/%s" type="text/css" />'
+                      '<link rel="stylesheet" href="blog.css"'
+                      'type="text/css" />' % (self.CSS_DIR, self.CSS_FILE))
+                                        
+        footer_str = ('<div id="footer">%s'
+                      '<a href="%s">%s</a> &mdash;<a href="mailto:%s">%s</a>'
+                      '</div>' % (self.LICENSE, self.AUTH_ADDR, 
+                                  self.AUTH_NAME, self.AUTH_MAIL, 
+                                  self.AUTH_MAIL)) 
+                              
         #write header, footer and title templates
         
         with open('.title.html', 'w+') as title_file:
@@ -405,12 +393,11 @@ class Pub():
            TODO(noel): This might be kind of smelly
            
         """
-        tmp_str = ''.join(['title on this line(do not use apostophies!)\n',
-                           '<p>The rest of the text file is an',
-                           '<b>html</b>', 
-                           'blog post. The process will continue when ', 
-                           'you exit the editor</p>',
-                          ])
+        tmp_str = ('title on this line(do not use apostophies!)\n'
+                   '<p>The rest of the text file is an <b>html</b>'
+                   'blog post. The process will continue when '
+                   'you exit the editor</p>')
+
         tmp_file = ''.join([str(random.randint(0,1000000)),'.tmp.html'])
                           
         with open(tmp_file, 'w+') as tmp:
@@ -461,16 +448,11 @@ class Pub():
 
                 #move the newly created file into drafts
                 #TODO(noel): add '.draft' to the filename
-                cmd = ''.join(['mv ',
-                               '%s/%s ',
-                               '%s/drafts/',
-                              ]) % (os.getcwd(),filename, os.getcwd())
-
+                cmd = '%s %s/%s %s/drafts/' % ('mv', os.getcwd(),
+                                               filename, os.getcwd())
                 os.system(cmd)
-                
-                print ' '.join(['saved your file to',                               
-                               '%s/drafts/%s',
-                              ]) % (os.getcwd(), filename)
+                print 'saved your file to %s/drafts/%s' % (os.getcwd(), 
+                                                           filename)
                 break
             
             #Save post to posts folder
