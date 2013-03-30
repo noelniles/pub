@@ -1,4 +1,3 @@
-#!/usr/bin/python
 import argparse
 import glob
 import os
@@ -10,6 +9,7 @@ from datetime import date
 import webbrowser
 from bs4 import BeautifulSoup as bs
 
+class Pub():
 """pub is inspired by bashblog, a program written by Carles Fenolosa.
 
     This program is made by Noel Niles and isn't very good or original.
@@ -30,36 +30,6 @@ from bs4 import BeautifulSoup as bs
     this dir. Be careful to write valid html!
 
 """
-class Pub():
-
-    def rebuild_css(self):
-        """Rebuilds the href attribute
-            
-            This is used when the css changes.
-
-        """
-        print 'rebuilding css'
-        oldfiles = os.listdir('posts/')
-        for oldfile in oldfiles:
-            abs_oldfile = '%s/%s/%s' % (os.getcwd(),'posts', oldfile)
-            newfilename = '%s.rebuilt' % abs_oldfile
-            print 'made new filename' + newfilename
-
-            stats = os.stat(abs_oldfile)
-            oldtime = (stats.st_atime, stats.st_mtime)
-            with open(abs_oldfile) as text:
-                print 'opened' + oldfile
-                soup = bs(text)
-                tag = soup.link
-                tag['href'] = '%s/%s' % (self.CSS_DIR, self.CSS_FILE)
-
-                with open(newfilename, 'w+') as newfile:
-                    newfile.write(soup.encode("ascii"))
-                    print 'wrote' + newfilename
-                os.system('%s %s %s' % ('mv', newfilename, abs_oldfile))
-                os.utime(abs_oldfile, (stats.st_atime, stats.st_mtime))
-                print 'preserved timestamp for' + abs_oldfile
-
     #Define some constants.
     SOFTWARE_NAME = "pub" 
     SOFTWARE_VERS = "0.0.1"
@@ -91,6 +61,35 @@ class Pub():
     #Location of css files
     CSS_DIR = '%s/%s' % (os.getcwd(), 'res/css')
     CSS_FILE = 'Toast/toast.css'
+
+    def rebuild_css(self):
+        """Rebuilds the href attribute
+            
+            This is used when the css changes.
+
+        """
+        print 'rebuilding css'
+        oldfiles = os.listdir('posts/')
+        for oldfile in oldfiles:
+            abs_oldfile = '%s/%s/%s' % (os.getcwd(),'posts', oldfile)
+            newfilename = '%s.rebuilt' % abs_oldfile
+            print 'made new filename' + newfilename
+
+            stats = os.stat(abs_oldfile)
+            oldtime = (stats.st_atime, stats.st_mtime)
+            with open(abs_oldfile) as text:
+                print 'opened' + oldfile
+                soup = bs(text)
+                tag = soup.link
+                tag['href'] = '%s/%s' % (self.CSS_DIR, self.CSS_FILE)
+
+                with open(newfilename, 'w+') as newfile:
+                    newfile.write(soup.encode("ascii"))
+                    print 'wrote' + newfilename
+                os.system('%s %s %s' % ('mv', newfilename, abs_oldfile))
+                os.utime(abs_oldfile, (stats.st_atime, stats.st_mtime))
+                print 'preserved timestamp for' + abs_oldfile
+
     def check_editor(self):
 
         """
@@ -397,6 +396,7 @@ class Pub():
             header_file.write(header_str)
         with open('.footer.html', 'w+') as footer_file:
             footer_file.write(footer_str)
+
     def write_entry(self, post_status):
         
         """
@@ -476,7 +476,7 @@ class Pub():
             #Save post to posts folder
             if post_status.upper() == 'P':
                 if not os.path.isdir(''.join([os.getcwd(), '/posts'])):
-                    os.mkdir(os.getcwd()+'/posts', 0700)
+                    os.mkdir(os.getcwd()+'/posts', 0755)
                 
                 cmd = ''.join(['mv ',
                                '%s/%s ', 
