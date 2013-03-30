@@ -10,26 +10,26 @@ import webbrowser
 from bs4 import BeautifulSoup as bs
 
 class Pub():
-"""pub is inspired by bashblog, a program written by Carles Fenolosa.
+    """pub is inspired by bashblog, a program written by Carles Fenolosa.
 
-    This program is made by Noel Niles and isn't very good or original.
-    Basically it builds a text file converts it to html and then rebuilds the 
-    index and anything else that needs rebuilt.
-    
-    Dependencies:   
-    - python-BeautifulSoup: I will eventually include this, but for now you 
-                            must install BeautifulSoup manually
-    
-    Files that this script generates(so far):
-    - all_posts.html
-    - index.html 
-    - one html file for each post; these are stored in '/posts/'
-    - a bunch of tmp files that are eventually deleted
-    
-    There are a lot of loops on '*.html' so keep everything else out of 
-    this dir. Be careful to write valid html!
+        This program is made by Noel Niles and isn't very good or original.
+        Basically it builds a text file converts it to html and then rebuilds the 
+        index and anything else that needs rebuilt.
+        
+        Dependencies:   
+        - python-BeautifulSoup: I will eventually include this, but for now you 
+                                must install BeautifulSoup manually
+        
+        Files that this script generates(so far):
+        - all_posts.html
+        - index.html 
+        - one html file for each post; these are stored in '/posts/'
+        - a bunch of tmp files that are eventually deleted
+        
+        There are a lot of loops on '*.html' so keep everything else out of 
+        this dir. Be careful to write valid html!
 
-"""
+    """
     #Define some constants.
     SOFTWARE_NAME = "pub" 
     SOFTWARE_VERS = "0.0.1"
