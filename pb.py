@@ -13,12 +13,8 @@ class Pub():
     """pub is inspired by bashblog, a program written by Carles Fenolosa.
 
         This program is made by Noel Niles and isn't very good or original.
-        Basically it builds a text file converts it to html and then rebuilds the 
-        index and anything else that needs rebuilt.
-        
-        Dependencies:   
-        - python-BeautifulSoup: I will eventually include this, but for now you 
-                                must install BeautifulSoup manually
+        Basically it builds a text file converts it to html and then rebuilds 
+        the index and anything else that needs rebuilt.
         
         Files that this script generates(so far):
         - all_posts.html
@@ -75,7 +71,7 @@ class Pub():
         print 'rebuilding css'
         oldfiles = os.listdir('posts/')
         for oldfile in oldfiles:
-            abs_oldfile = '%s/%s/%s' % (os.getcwd(),'posts', oldfile)
+            abs_oldfile = '%s/%s/%s' % (os.getcwd(), 'posts', oldfile)
             newfilename = '%s.rebuilt' % abs_oldfile
             print 'made new filename' + newfilename
 
@@ -226,7 +222,7 @@ class Pub():
         #opening tags for the content
         
         content.append('<h3>All Posts</h3><ul>')  
-        for i,t in enumerate(title):                                   
+        for i, t in enumerate(title):                                   
             content.append(''.join([title[i]]))
 
         #join the content with the closing tags
@@ -240,7 +236,8 @@ class Pub():
         #move tmp file to archive
         os.system(('%s %s %s') % ('mv', tmp_filename, filename))
     
-    def create_html_page(self, content, filename, index, new_title, when_created=False):
+    def create_html_page(self, content, filename, index, new_title, 
+                         when_created=False):
 
         """
             Create an html page.
@@ -264,9 +261,7 @@ class Pub():
         #get the correct filename from rebuilt files
         
         file_url = filename.split('.rebuilt')[0]
-        blog_addr = self.BLOG_ADDR
-        auth_name = self.AUTH_NAME
-        
+       
         # read the header template
         
         with open(".header.html", "r") as header:
@@ -289,21 +284,14 @@ class Pub():
         # If this blog doesn't exist yet then create new timestamp, 
         # author and new begining tags
         if index is 'no':
-            new_post = ''.join(['<!-- entry begin -->',
-                                '<h3><a class="ablack"',
-                                ' href="%(blog_addr)s/%(file_url)s">',
-                                '%(new_title)s',
-                                '</a></h3>',
-                                '<div class="subtitle">&mdash;',
-                                '%(timestamp)s ',
-                                '%(auth_name)s',
-                                '</div>',
-                                '<!-- text begin -->',
-                               ]) % locals()
-                                
-            end_tags = ''.join(['<!-- text end -->',
-                                '<!-- entry end -->',
-                               ])
+            new_post = ('<!-- entry begin -->'
+                        '<h3><a class="ablack" href="%s/%s">%s</a></h3>'
+                        '<div class="subtitle">&mdash;%s %s</div>'
+                        '<!-- text begin -->' % (self.BLOG_ADDR, file_url,
+                                                new_title, timestamp, 
+                                                self.AUTH_NAME))
+                        
+            end_tags = '<!-- text end --><!-- entry end -->'
             
         """
             Build the html page.
@@ -324,30 +312,20 @@ class Pub():
             footer_str -- string; comes from '.footer.html' file
                 
         """
-        html = bs(''.join(['%(header_str)s',
-                           '<title>%(new_title)s</title>',
-                           '</head><body>', #end of head; beginning of body
-                           #self.google_analytics(),
-                           '<div id="divbodyholder">',
-                           '<div class="headerholder"><div class="header">',
-                           '<div id="title">',
-                           '%(title_str)s',
-                           '</div></div></div>',
-                           '<div id="divbody"><div class="content">',
-                           '%(new_post)s',
-                           '%(content)s',
-                           '%(end_tags)s',                           
-                           '%(footer_str)s',
-                           '</div></div>',
-                           '</body></html>'
-                          ]) % locals()).prettify()
+        html = ('%s <title>%s</title></head><body><div id="divbodyholder">'
+                '<div class="headerholder"><div class="header">'
+                '<div id="title">%s</div></div></div><div id="divbody">'
+                '<div class="content">%s %s %s %s</div></div>'
+                '</body></html>' % (header_str, new_title, title_str, 
+                                    new_post, content, end_tags, footer_str))               
+        html = bs(html).prettify()
 
         #write the html file
         with open(filename, "w+") as hf: #[h]tml [f]ile
             hf.write(html.encode('utf-8'))
             if when_created:
                 stat = os.stat(filename)
-                os.utime(filename, (stat.st_atime, stat_st_mtime))
+                os.utime(filename, (stat.st_atime, stat.st_mtime))
            
     def create_includes(self):
     
@@ -402,7 +380,7 @@ class Pub():
                    'blog post. The process will continue when '
                    'you exit the editor</p>')
 
-        tmp_file = '.%s.tmp.html' % (random.randint(0,1000000))
+        tmp_file = '.%s.tmp.html' % (random.randint(0, 1000000))
                           
         with open(tmp_file, 'w+') as tmp:
             tmp.write(tmp_str)
@@ -504,7 +482,7 @@ class Pub():
         parser = argparse.ArgumentParser(
                             description='Edit a blog from the command line')
         #Add command line arguments                    
-        parser.add_argument('-e','--edit', nargs=1, 
+        parser.add_argument('-e', '--edit', nargs=1, 
                             help='''edit a live blog file; do not manually 
                             edit blog files. This functions maintains the 
                             original timestamp''')
