@@ -69,14 +69,13 @@ class Pub():
 
         """
         print 'rebuilding css'
-        oldfiles = os.listdir('posts/')
+        oldfiles = os.listdir('posts')
         for oldfile in oldfiles:
             abs_oldfile = '%s/%s/%s' % (os.getcwd(), 'posts', oldfile)
             newfilename = '%s.rebuilt' % abs_oldfile
             print 'made new filename' + newfilename
 
             stats = os.stat(abs_oldfile)
-            oldtime = (stats.st_atime, stats.st_mtime)
             with open(abs_oldfile) as text:
                 print 'opened' + oldfile
                 soup = bs(text)
@@ -189,7 +188,6 @@ class Pub():
         tmp_filename = '%s.%s.%s' % (prefix, filename, 'tmp')
         
         #find all of the post titles in the post dir
-        posts = glob.iglob('posts/*.html')
         title = []
         content = []
         
@@ -238,12 +236,11 @@ class Pub():
     
     def create_html_page(self, content, filename, index, new_title, 
                          when_created=False):
-
         """
             Create an html page.
     
-            Uses input from write_entry() and the html includes
-            created by create_includes to build a complete html page.
+            Uses input from and the html includes created by create_includes 
+            to build a complete html page.
                 
             Keyword Arguments:
             content   -- the actual content of a new post
@@ -257,23 +254,17 @@ class Pub():
                         - Write the files in a loop.
                
         """
-    
+
         #get the correct filename from rebuilt files
         
         file_url = filename.split('.rebuilt')[0]
        
-        # read the header template
-        
+        # read the header template, title and footer
+
         with open(".header.html", "r") as header:
-            header_str = header.read()
-            
-        # read the title string
-        
+            header_str = header.read()           
         with open(".title.html", "r") as title:
             title_str = title.read()
-            
-        #read the footer string
-        
         with open(".footer.html", "r") as footer:
             footer_str = footer.read()
             
@@ -292,27 +283,8 @@ class Pub():
                                                 self.AUTH_NAME))
                         
             end_tags = '<!-- text end --><!-- entry end -->'
-            
-        """
-            Build the html page.
-        
-            All of the strings are ready to be put into BeautifulSoup.
-            
-            Variables:
-            header_str -- string that comes from '.header.html' file
-            new_title  -- title of new blog entry;  
-            title_str  -- blog name string comes from '.title.html'
-                          file 
-            new_post   -- string; created if index is 'no'; builds the
-                          beginning of a new blog
-            content    -- string; this will be created by
-                          write_entry()   
-            end_tags   -- string; created if index is 'no'; builds end
-                          of new blog
-            footer_str -- string; comes from '.footer.html' file
-                
-        """
-        html = ('%s <title>%s</title></head><body><div id="divbodyholder">'
+
+        html = ('%s<title>%s</title></head><body><div id="divbodyholder">'
                 '<div class="headerholder"><div class="header">'
                 '<div id="title">%s</div></div></div><div id="divbody">'
                 '<div class="content">%s %s %s %s</div></div>'
