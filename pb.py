@@ -31,12 +31,16 @@ class Pub():
 
     """
     #Define some constants.
+    DEV = True
     SOFTWARE_NAME = "pub" 
     SOFTWARE_VERS = "0.0.1"
     """Blog information"""
     BLOG_NAME = "MY_BLOG"
     BLOG_DESC = ""
-    BLOG_ADDR = "http://www.myblog.com"
+    if DEV is True:
+        BLOG_ADDR = 'file:///%s' % (os.getcwd())
+    else:
+        BLOG_ADDR = "http://www.myblog.com"
     #Author information
     AUTH_NAME = "Author Name"
     AUTH_ADDR = "http://authors_address.com"
