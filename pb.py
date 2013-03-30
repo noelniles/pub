@@ -398,12 +398,11 @@ class Pub():
                    'blog post. The process will continue when '
                    'you exit the editor</p>')
 
-        tmp_file = ''.join([str(random.randint(0,1000000)),'.tmp.html'])
+        tmp_file = '.%s.tmp.html' % (random.randint(0,1000000))
                           
         with open(tmp_file, 'w+') as tmp:
             tmp.write(tmp_str)
 
-        
         while post_status:
             
             #Edit the post
