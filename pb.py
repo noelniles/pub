@@ -276,13 +276,13 @@ class Pub():
         # author and new begining tags
         if index is 'no':
             new_post = ('<!-- entry begin -->'
-                        '<h3><a class="ablack" href="%s/%s">%s</a></h3>'
+                        '<h3><a class="ablack" href="%s/posts/%s">%s</a></h3>'
                         '<div class="subtitle">&mdash;%s %s</div>'
-                        '<!-- text begin -->' % (self.BLOG_ADDR, file_url,
-                                                new_title, timestamp, 
-                                                self.AUTH_NAME))
-                        
-            end_tags = '<!-- text end --><!-- entry end -->'
+                    '<!-- text begin -->' % (self.BLOG_ADDR, file_url,
+                                            new_title, timestamp, 
+                                            self.AUTH_NAME))
+                    
+        end_tags = '<!-- text end --><!-- entry end -->'
 
         html = ('%s<title>%s</title></head><body><div id="divbodyholder">'
                 '<div class="headerholder"><div class="header">'
@@ -298,9 +298,9 @@ class Pub():
             if when_created:
                 stat = os.stat(filename)
                 os.utime(filename, (stat.st_atime, stat.st_mtime))
-           
+       
     def create_includes(self):
-    
+
         """ 
             Create_includes
             
@@ -372,56 +372,56 @@ class Pub():
                     #content or body is the rest
                     content = f.read()
             
-                #change the filename to the title string with underscores
-                #clean the filename so bash doesn't give up'
-                filename = title.replace(' ', '_').strip().lower()
-                pat = re.compile('[^\w\s]+')
-                filename = pat.sub('', filename)
-                filename += '.html'
-            
-                #create the html page
-                self.create_html_page(content, filename, 'no', title) 
-            
-                preview = raw_input('would you like to preview the page?'
-                                    '[y]yes or [n]no\n')
-            
-                if preview.upper() == 'Y':
-                    preview_filename = 'file:///%s/%s' % (os.getcwd(),
-                                                          filename)
-
-                    webbrowser.open_new_tab(preview_filename)
+                    #change the filename to the title string with underscores
+                    #clean the filename so bash doesn't give up'
+                    filename = title.replace(' ', '_').strip().lower()
+                    pat = re.compile('[^\w\s]+')
+                    filename = pat.sub('', filename)
+                    filename += '.html'
                 
-            post_status = raw_input('[E]dit, [D]raft, [P]ost\n')
-            
-            #Save post to drafts folder
-            if post_status.upper() == 'D':
-                #create the drafts folder if it's not there
-                if not os.path.isdir(''.join([os.getcwd(), '/drafts'])):
-                    os.mkdir(os.getcwd()+'/drafts', 0700)
-
-                #move the newly created file into drafts
-                #TODO(noel): add '.draft' to the filename
-                cmd = '%s %s/%s %s/drafts/' % ('mv', os.getcwd(),
-                                               filename, os.getcwd())
-                os.system(cmd)
-                print 'saved your file to %s/drafts/%s' % (os.getcwd(), 
-                                                           filename)
-                break
-            
-            #Save post to posts folder
-            if post_status.upper() == 'P':
-                if not os.path.isdir(''.join([os.getcwd(), '/posts'])):
-                    os.mkdir(os.getcwd()+'/posts', 0755)
+                    #create the html page
+                    self.create_html_page(content, filename, 'no', title) 
                 
-                cmd = ''.join(['mv ',
-                               '%s/%s ', 
-                               '%s/posts',
-                              ]) % (os.getcwd(), filename, os.getcwd())
+                    preview = raw_input('would you like to preview the page?'
+                                        '[y]yes or [n]no\n')
+                
+                    if preview.upper() == 'Y':
+                        preview_filename = 'file:///%s/%s' % (os.getcwd(),
+                                                              filename)
 
-                os.system(cmd)
+                        webbrowser.open_new_tab(preview_filename)
+                    
+                post_status = raw_input('[E]dit, [D]raft, [P]ost\n')
+                
+                #Save post to drafts folder
+                if post_status.upper() == 'D':
+                    #create the drafts folder if it's not there
+                    if not os.path.isdir(''.join([os.getcwd(), '/drafts'])):
+                        os.mkdir(os.getcwd()+'/drafts', 0700)
 
-                print "blog posted"
-                break
+                    #move the newly created file into drafts
+                    #TODO(noel): add '.draft' to the filename
+                    cmd = '%s %s/%s %s/drafts/' % ('mv', os.getcwd(),
+                                                   filename, os.getcwd())
+                    os.system(cmd)
+                    print 'saved your file to %s/drafts/%s' % (os.getcwd(), 
+                                                               filename)
+                    break
+                
+                #Save post to posts folder
+                if post_status.upper() == 'P':
+                    if not os.path.isdir(''.join([os.getcwd(), '/posts'])):
+                        os.mkdir(os.getcwd()+'/posts', 0755)
+                    
+                    cmd = ''.join(['mv ',
+                                   '%s/%s ', 
+                                   '%s/posts',
+                                  ]) % (os.getcwd(), filename, os.getcwd())
+
+                    os.system(cmd)
+
+                    print "blog posted"
+                    break
     def delete_includes(self):
     
         """
