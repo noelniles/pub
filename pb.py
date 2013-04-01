@@ -26,78 +26,52 @@ class Pub():
         this dir. Be careful to write valid html!
 
     """
-    #Define some constants.
+    #Change DEV to true for local testing false for testing on a server
     DEV = True
-    SOFTWARE_NAME = "pub" 
-    SOFTWARE_VERS = "0.0.1"
+    if DEV is True: BLOG_ADDR = 'file:///%s' % (os.getcwd())
+    else: BLOG_ADDR = 'http://www.myblog.com'
+    SOFTWARE_NAME = 'pub' 
+    SOFTWARE_VERS = '0.0.1'
     """Blog information"""
-    BLOG_NAME = "MY_BLOG"
-    BLOG_DESC = ""
-    if DEV is True:
-        BLOG_ADDR = 'file:///%s' % (os.getcwd())
-    else:
-        BLOG_ADDR = "http://www.myblog.com"
+    BLOG_NAME = 'MY_BLOG'
+    BLOG_DESC = ''
     #Author information
-    AUTH_NAME = "Author Name"
-    AUTH_ADDR = "http://authors_address.com"
-    AUTH_MAIL = "author@email.com"
+    AUTH_NAME = 'Author Name'
+    AUTH_ADDR = 'http://authors_address.com'
+    AUTH_MAIL = 'author@email.com'
     #Licensing and stuff
-    LICENSE = "GPLv3000"  
+    LICENSE = 'GPLv3000'
     #Blog generated files
-    INDEX_FILE = "index.html"
-    NUMBER_OF_INDEX_ARTICLES = "8"
-    ARCHIVE_INDEX = "all_posts.html"
-    BLOG_FEED = "feed.rss"
+    INDEX_FILE = 'index.html'
+    NUMBER_OF_INDEX_ARTICLES = '8'
+    ARCHIVE_INDEX = 'all_posts.html'
+    BLOG_FEED = 'feed.rss'
     #Localization an i18n
     #Used in link after every post
-    TEMPLATE_COMMENTS = "Comments?"
+    TEMPLATE_COMMENTS = 'Comments?'
     #Used on the bottom of every page to link to archive
-    TEMPLATE_ARCHIVE = "View more posts?"
+    TEMPLATE_ARCHIVE = 'View more posts?'
     #link back to the blog index
-    TEMPLATE_ARCHIVE_INDEX_PAGE = "Back to the blog index?"
+    TEMPLATE_ARCHIVE_INDEX_PAGE = 'Back to the blog index?'
     #The locale and format used for the date
-    DATE_FORMAT = "%a, %d %b %Y %H:%M"
-    DATE_LOCALE = ""
+    DATE_FORMAT = '%a, %d %b %Y %H:%M'
+    DATE_LOCALE = ''
     #Location of css files
     CSS_DIR = '%s/%s' % (BLOG_ADDR, 'res/css')
     CSS_FILE = 'Toast/toast.css'
+    POST_DIR = '%s/%s' % (os.getcwd(), 'posts')
+    DRAFT_DIR = '%s/%s' % (os.getcwd(), 'drafts')
 
-    def rebuild_css(self):
-        """Rebuilds the href attribute
-            
-            This is used when the css changes.
+    def setup(self):
 
-        """
-        print 'rebuilding css'
-        oldfiles = os.listdir('posts')
-        for oldfile in oldfiles:
-            abs_oldfile = '%s/%s/%s' % (os.getcwd(), 'posts', oldfile)
-            newfilename = '%s.rebuilt' % abs_oldfile
-            print 'made new filename' + newfilename
+        #create the drafts folder if it's not there
+        if not os.path.isdir(self.DRAFT_DIR):
+            os.mkdir(self.DRAFT_DIR, 0700)
 
-            stats = os.stat(abs_oldfile)
-            with open(abs_oldfile) as text:
-                print 'opened' + oldfile
-                soup = bs(text)
-                tag = soup.link
-                tag['href'] = '%s/%s' % (self.CSS_DIR, self.CSS_FILE)
+        #create posts directory if it's not there
+        if not os.path.isdir(self.POST_DIR):
+            os.mkdir(self.POST_DIR, 0755)
 
-                with open(newfilename, 'w+') as newfile:
-                    newfile.write(soup.encode("ascii"))
-                    print 'wrote' + newfilename
-                os.system('%s %s %s' % ('mv', newfilename, abs_oldfile))
-                os.utime(abs_oldfile, (stats.st_atime, stats.st_mtime))
-                print 'preserved timestamp for' + abs_oldfile
-
-    def check_editor(self):
-
-        """
-            Check the $EDITOR variable.
-            
-            If the system editor is not set try to use vim; otherwise give 
-            up
-            
-        """
         #check if the editor is set
         print 'checking setup'
         if not os.getenv('EDITOR'):
@@ -111,18 +85,29 @@ class Pub():
                 sys.exit()
         else:
             print 'editor checks good'
-    
-    def list_posts(self):
+
+    def rebuild_css(self):
+        """Rebuilds the href attribute
+            
+            This is used when the css changes.
 
         """
-            List all of the posts
-                   
-        """
-        posts = os.listdir('posts')
-        
-        for post in posts:
-            print post
-                
+        print 'rebuilding css'
+        oldfiles = os.listdir('posts')
+        for oldfile in oldfiles:
+            abs_oldfile = '%s/%s/%s' % (os.getcwd(), 'posts', oldfile)
+            newfilename = '%s.rebuilt' % abs_oldfile
+            stats = os.stat(abs_oldfile)
+            with open(abs_oldfile) as text:
+                soup = bs(text)
+                tag = soup.link
+                tag['href'] = '%s/%s' % (self.CSS_DIR, self.CSS_FILE)
+
+                with open(newfilename, 'w+') as newfile:
+                    newfile.write(soup.encode("ascii"))
+                os.system('%s %s %s' % ('mv', newfilename, abs_oldfile))
+                os.utime(abs_oldfile, (stats.st_atime, stats.st_mtime))
+
     def rebuild_index(self):
 
         """
@@ -144,7 +129,7 @@ class Pub():
         """
         print 'rebuilding the index'
         rstr = str(random.randint(1, 1000000))
-        new_index_file = '%s.%s' % (self.INDEX_FILE, rstr)
+        new_index_file = '.%s.%s' % (rstr, self.INDEX_FILE)
         content_list = []
 
         #all of the posts
@@ -156,8 +141,7 @@ class Pub():
                     content_list.append(content.group(1))
         
         content_list = ''.join(content_list)       
-        self.create_html_page(content_list, new_index_file, 'no', self.
-                              BLOG_NAME)
+        self.create_html_page(content_list, new_index_file, self.BLOG_NAME)
         
         os.system('%s %s %s' % ('mv', new_index_file, self.INDEX_FILE))
 
@@ -172,30 +156,29 @@ class Pub():
             
             Vars:
             filename     -- string; archive file
-            tmp_filename -- string; temporary archive file
             text         -- file; text from all of the post files
             soup         -- all of the posts inside a bs object
             ttag         -- all of the titles with the <title> tags
             tlst         -- list of all titles sans tags
-            title        -- list of all the pretty titles we just grabbed
+            titles       -- list of all the pretty titles we just grabbed
             posts        -- glob of all the html files in '/posts' dir
-            titles       -- itertable of tlst
+            title        -- itertable of tlst
             
         """
         print "creating an archive "
-        prefix = str(random.randint(1, 1000000))
         filename = self.ARCHIVE_INDEX
-        tmp_filename = '%s.%s.%s' % (prefix, filename, 'tmp')
         
         #find all of the post titles in the post dir
-        title = []
+        titles = []
         content = []
         
         #get all of the titles 
         for v in self.sort_ls('posts/'):
-            with open(os.getcwd()+'/posts/'+v) as post:
+            posts = '%s/%s/%s' % (os.getcwd(), 'posts', v)
+
+            with open(posts) as post:
                 #get the date
-                stat = os.stat(os.getcwd()+'/posts/'+v)
+                stat = os.stat(posts)
                 #make sure the file is not empty
                 #if it is we have big problems
                 if stat.st_size != 0:
@@ -208,33 +191,28 @@ class Pub():
                     ttag = soup.title
                     tlst = ttag.contents
                     print tlst
-                    titles = iter(tlst)
-                    titles = titles.next()
+                    title = iter(tlst).next()
                     #clean up the title        
-                    title.append(''.join(['<li><a href=%s/%s>%s',
-                                          '</a>&mdash;%s',
-                                          '</li>']) % (self.BLOG_ADDR, v, 
-                                                       titles, hdate))
+                    titles.append('<li><a href=%s/posts/%s>%s</a>&mdash;%s'
+                                  '</li>' % (self.BLOG_ADDR, v, title, hdate))
                 else:
                     print 'you have an empty file in posts'
         #opening tags for the content
         
         content.append('<h3>All Posts</h3><ul>')  
-        for i, t in enumerate(title):                                   
-            content.append(''.join([title[i]]))
+        for i, t in enumerate(titles):                                   
+            content.append(titles[i])
 
         #join the content with the closing tags
         #TODO(noel): the link is created with a tmp file name that will
         #            no longer exist. create_html_page should strip 
         #            the prefix and '.tmp'
         content.append('</ul>')
-        self.create_html_page(''.join(content), tmp_filename, 'no', 
-                              self.BLOG_NAME+' all posts')
+        content = ''.join(content)
+        self.create_html_page(content, filename, 
+                              '%s archive generated at: ' % self.BLOG_NAME)
         
-        #move tmp file to archive
-        os.system(('%s %s %s') % ('mv', tmp_filename, filename))
-    
-    def create_html_page(self, content, filename, index, new_title, 
+    def create_html_page(self, content, filename, new_title, 
                          when_created=False):
         """
             Create an html page.
@@ -274,13 +252,12 @@ class Pub():
                 
         # If this blog doesn't exist yet then create new timestamp, 
         # author and new begining tags
-        if index is 'no':
-            new_post = ('<!-- entry begin -->'
-                        '<h3><a class="ablack" href="%s/posts/%s">%s</a></h3>'
-                        '<div class="subtitle">&mdash;%s %s</div>'
-                    '<!-- text begin -->' % (self.BLOG_ADDR, file_url,
-                                            new_title, timestamp, 
-                                            self.AUTH_NAME))
+        new_post = ('<!-- entry begin -->'
+                    '<h3><a class="ablack" href="%s/posts/%s">%s</a></h3>'
+                    '<div class="subtitle">&mdash;%s %s</div>'
+                '<!-- text begin -->' % (self.BLOG_ADDR, file_url,
+                                        new_title, timestamp, 
+                                        self.AUTH_NAME))
                     
         end_tags = '<!-- text end --><!-- entry end -->'
 
@@ -340,13 +317,13 @@ class Pub():
             footer_file.write(footer_str)
 
     def write_entry(self, post_status):
-        
         """
            Write entry manges the creation of html file
            
            TODO(noel): This might be kind of smelly
            
         """
+
         tmp_str = ('title on this line(do not use apostophies!)\n'
                    '<p>The rest of the text file is an <b>html</b>'
                    'blog post. The process will continue when '
@@ -380,7 +357,7 @@ class Pub():
                     filename += '.html'
                 
                     #create the html page
-                    self.create_html_page(content, filename, 'no', title) 
+                    self.create_html_page(content, filename, title) 
                 
                     preview = raw_input('would you like to preview the page?'
                                         '[y]yes or [n]no\n')
@@ -388,40 +365,27 @@ class Pub():
                     if preview.upper() == 'Y':
                         preview_filename = 'file:///%s/%s' % (os.getcwd(),
                                                               filename)
-
                         webbrowser.open_new_tab(preview_filename)
                     
                 post_status = raw_input('[E]dit, [D]raft, [P]ost\n')
-                
+
                 #Save post to drafts folder
                 if post_status.upper() == 'D':
-                    #create the drafts folder if it's not there
-                    if not os.path.isdir(''.join([os.getcwd(), '/drafts'])):
-                        os.mkdir(os.getcwd()+'/drafts', 0700)
-
                     #move the newly created file into drafts
                     #TODO(noel): add '.draft' to the filename
-                    cmd = '%s %s/%s %s/drafts/' % ('mv', os.getcwd(),
-                                                   filename, os.getcwd())
-                    os.system(cmd)
-                    print 'saved your file to %s/drafts/%s' % (os.getcwd(), 
-                                                               filename)
+                    os.system('mv %s/%s %s' % (os.getcwd(), filename, 
+                                               self.DRAFT_DIR))
+                    print 'saved to: %s/%s' % (self.DRAFT_DIR, filename)
                     break
                 
                 #Save post to posts folder
-                if post_status.upper() == 'P':
-                    if not os.path.isdir(''.join([os.getcwd(), '/posts'])):
-                        os.mkdir(os.getcwd()+'/posts', 0755)
-                    
-                    cmd = ''.join(['mv ',
-                                   '%s/%s ', 
-                                   '%s/posts',
-                                  ]) % (os.getcwd(), filename, os.getcwd())
-
-                    os.system(cmd)
-
+                elif post_status.upper() == 'P':
+                    os.system('mv %s/%s %s' % (os.getcwd(), filename, 
+                                               self.POST_DIR))
                     print "blog posted"
                     break
+                else:
+                    print 'invalid entry'
     def delete_includes(self):
     
         """
@@ -447,7 +411,7 @@ class Pub():
         os.utime(file_to_edit, (post_date.st_atime, post_date.st_mtime))
          
     def main(self):
-        self.check_editor()
+        self.setup()
         #Create includes
         self.create_includes()
         #Create parser for command line arguments
@@ -484,7 +448,9 @@ class Pub():
         if self.args.rebuild:
             self.rebuild_css()
         if self.args.list:
-            self.list_posts()
+            posts = os.listdir('posts')
+            for post in posts:
+                print post
         
         #delete the junk
         self.delete_includes()
