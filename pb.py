@@ -81,6 +81,13 @@ class Pub():
         else:
             print 'using %s to edit files' % (os.getenv('EDITOR'))
 
+    def backup_posts(self):
+        src = os.path.join(os.getcwd(), 'posts')
+        des = os.path.join(os.getcwd(), 'backups')
+
+        os.system('rsync -ab %s %s' % (src, des))
+        print 'backup completed'
+
     def rebuild_css(self):
         """Rebuilds the href attribute; used when the css changes."""
 
@@ -360,15 +367,6 @@ class Pub():
                 else:
                     print 'invalid entry'
 
-    def delete_includes(self):
-        """Delete the tempory files"""
-
-        temporary_files = glob.iglob('.*.html')
-        for i in temporary_files:
-            #do not remove the archive file or the index file
-            if i != self.ARCHIVE_INDEX and i != self.INDEX_FILE:
-                os.remove(i)
-            
     def edit_html(self, file_to_edit):
         """Edit an html file keeping the original timestamp"""
 
@@ -420,8 +418,12 @@ class Pub():
                 print post
         
         #delete the junk
-        self.delete_includes()
                                                   
+        temporary_files = glob.iglob('.*.html')
+        for i in temporary_files:
+            os.remove(i)
+        #backup posts
+        self.backup_posts()
                                                       
 if __name__ == "__main__": 
     pub = Pub()
