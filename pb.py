@@ -8,7 +8,8 @@ import time
 from datetime import date
 import webbrowser
 from bs4 import BeautifulSoup as bs
-
+import conf
+print locals()
 class Pub():
     """pub is inspired by bashblog, a program written by Carles Fenolosa.
 
@@ -26,44 +27,9 @@ class Pub():
         this dir. Be careful to write valid html!
 
     """
-    #Change DEV to true for local testing or false for testing on a server
-    DEV = True
-    if DEV is True: BLOG_ADDR = 'file:///%s' % (os.getcwd())
-    else: BLOG_ADDR = 'http://www.myblog.com'
-    SOFTWARE_NAME = 'pub' 
-    SOFTWARE_VERS = '0.0.1'
-    """Blog information"""
-    BLOG_NAME = 'MY_BLOG'
-    BLOG_DESC = ''
-    #Author information
-    AUTH_NAME = 'Author Name'
-    AUTH_ADDR = 'http://authors_address.com'
-    AUTH_MAIL = 'author@email.com'
-    #Licensing and stuff
-    LICENSE = 'GPLv3000'
-    #Blog generated files
-    INDEX_FILE = 'index.html'
-    NUMBER_OF_INDEX_ARTICLES = '8'
-    ARCHIVE_INDEX = 'all_posts.html'
-    BLOG_FEED = 'feed.rss'
-    #Localization an i18n
-    #Used in link after every post
-    TEMPLATE_COMMENTS = 'Comments?'
-    #Used on the bottom of every page to link to archive
-    TEMPLATE_ARCHIVE = 'View more posts?'
-    #link back to the blog index
-    TEMPLATE_ARCHIVE_INDEX_PAGE = 'Back to the blog index?'
-    #The locale and format used for the date
-    DATE_FORMAT = '%a, %d %b %Y %H:%M'
-    DATE_LOCALE = ''
-    #Location of css files
-    CSS_DIR = '%s/%s' % (BLOG_ADDR, 'res/css')
-    CSS_FILE = 'foundation.css'
-    POST_DIR =  'posts'
-    DRAFT_DIR = 'drafts'
 
     def setup(self):
-        gen_dirs = (self.DRAFT_DIR, self.POST_DIR)
+        gen_dirs = (conf.DRAFT_DIR, conf.POST_DIR)
         for directory in gen_dirs:
             if not os.path.isdir(directory):
                 os.mkdir(directory, 0755)
@@ -92,7 +58,7 @@ class Pub():
         """Rebuilds the href attribute; used when the css changes."""
 
         print 'rebuilding css'
-        oldfiles = os.listdir(self.POST_DIR)
+        oldfiles = os.listdir(conf.POST_DIR)
         for oldfile in oldfiles:
             abs_oldfile = '%s/%s/%s' % (os.getcwd(), 'posts', oldfile)
             newfilename = '%s.rebuilt' % abs_oldfile
@@ -100,7 +66,7 @@ class Pub():
             with open(abs_oldfile) as text:
                 soup = bs(text)
                 tag = soup.link
-                tag['href'] = '%s/%s' % (self.CSS_DIR, self.CSS_FILE)
+                tag['href'] = '%s/%s' % (conf.CSS_DIR, conf.CSS_FILE)
 
                 with open(newfilename, 'w+') as newfile:
                     newfile.write(soup.encode("ascii"))
@@ -125,12 +91,12 @@ class Pub():
         """
         print 'rebuilding the index'
         rstr = str(random.randint(1, 1000000))
-        new_index_file = '.%s.%s' % (rstr, self.INDEX_FILE)
+        new_index_file = '.%s.%s' % (rstr, conf.INDEX_FILE)
         content_list = []
 
         #all of the posts
-        for sorted_post in self.sort_ls(self.POST_DIR):
-            filename = '%s/%s' % (self.POST_DIR, sorted_post)
+        for sorted_post in self.sort_ls(conf.POST_DIR):
+            filename = '%s/%s' % (conf.POST_DIR, sorted_post)
             with (open(filename)) as post_file:
                 post_html = post_file.read()
                 content = re.search((ur'<!-- entry begin -->(.*?)<!-- entry ' 
@@ -139,9 +105,9 @@ class Pub():
                     content_list.append(content.group(1))
         
         content_list = ''.join(content_list)       
-        self.create_html_page(content_list, new_index_file, self.BLOG_NAME)
+        self.create_html_page(content_list, new_index_file, conf.BLOG_NAME)
         
-        os.system('mv %s %s' % (new_index_file, self.INDEX_FILE))
+        os.system('mv %s %s' % (new_index_file, conf.INDEX_FILE))
 
     def sort_ls(self, path):
         """Sort path by reverse mtime, newest first"""
@@ -164,15 +130,15 @@ class Pub():
             
         """
         print "creating an archive "
-        filename = self.ARCHIVE_INDEX
+        filename = conf.ARCHIVE_INDEX
         
         #find all of the post titles in the post dir
         titles = []
         content = []
         
         #get all of the titles 
-        for postfile in self.sort_ls(self.POST_DIR):
-            filepath = '%s/%s' % (self.POST_DIR, postfile)
+        for postfile in self.sort_ls(conf.POST_DIR):
+            filepath = '%s/%s' % (conf.POST_DIR, postfile)
 
             with open(filepath) as post:
                 print 'HI'
@@ -191,7 +157,7 @@ class Pub():
                     title = iter(tlst).next()
                     #clean up the title        
                     titles.append('<li><a href=%s/%s>%s</a>&mdash;%s'
-                                  '</li>' % (self.BLOG_ADDR, filepath, title, 
+                                  '</li>' % (conf.BLOG_ADDR, filepath, title, 
                                              hdate))
                 else:
                     print 'you have an empty file in posts'
@@ -205,7 +171,7 @@ class Pub():
         content.append('</ul>')
         content = ''.join(content)
         self.create_html_page(content, filename, 
-                              '%s archive generated at: ' % self.BLOG_NAME)
+                              '%s archive generated at: ' % conf.BLOG_NAME)
         
     def create_html_page(self, content, filename, new_title, 
                          when_created=False):
@@ -242,15 +208,15 @@ class Pub():
             
         #create the timestamp
         
-        timestamp = time.strftime(self.DATE_FORMAT)
+        timestamp = time.strftime(conf.DATE_FORMAT)
                 
         # If this blog doesn't exist yet then create new timestamp, 
         # author and new begining tags
         new_post = ('<!-- entry begin --><h3><a href="%s/posts/%s">%s</a>'
                     '</h3><div class="subtitle">&mdash;%s %s</div>'
-                    '<!-- text begin -->' % (self.BLOG_ADDR, file_url,
+                    '<!-- text begin -->' % (conf.BLOG_ADDR, file_url,
                                             new_title, timestamp, 
-                                            self.AUTH_NAME))
+                                            conf.AUTH_NAME))
                     
         end_tags = '<!-- text end --><!-- entry end -->'
 
@@ -280,17 +246,17 @@ class Pub():
                    
         """
         title_str = ('<h1><a href="%s">%s</a>'
-                     '</h1>' % (self.BLOG_ADDR, self.BLOG_NAME))
+                     '</h1>' % (conf.BLOG_ADDR, conf.BLOG_NAME))
 
         header_str = ('<!DOCTYPE html><head><meta http-equiv="Content-type"'
                       'content="text/html;charset=utf-8" />'
                       '<link rel="stylesheet" href="%s/%s" type="text/css" />'
-                      % (self.CSS_DIR, self.CSS_FILE))
+                      % (conf.CSS_DIR, conf.CSS_FILE))
                                         
         footer_str = ('<div id="footer">%s<a href="%s">%s</a> &mdash;'
-                      '<a href="mailto:%s">%s</a></div>' % (self.LICENSE, 
-                          self.AUTH_ADDR, self.AUTH_NAME, self.AUTH_MAIL, 
-                          self.AUTH_MAIL)) 
+                      '<a href="mailto:%s">%s</a></div>' % (conf.LICENSE, 
+                          conf.AUTH_ADDR, conf.AUTH_NAME, conf.AUTH_MAIL, 
+                          conf.AUTH_MAIL)) 
                               
         #write header, footer and title templates
         
@@ -354,14 +320,14 @@ class Pub():
                     #move the newly created file into drafts
                     #TODO(noel): add '.draft' to the filename
                     os.system('mv %s/%s %s' % (os.getcwd(), filename, 
-                                               self.DRAFT_DIR))
-                    print 'saved to: %s/%s' % (self.DRAFT_DIR, filename)
+                                               conf.DRAFT_DIR))
+                    print 'saved to: %s/%s' % (conf.DRAFT_DIR, filename)
                     break
                 
                 #Save post to posts folder
                 elif post_status.upper() == 'P':
                     os.system('mv %s/%s %s' % (os.getcwd(), filename, 
-                                               self.POST_DIR))
+                                               conf.POST_DIR))
                     print "blog posted"
                     break
                 else:
