@@ -48,7 +48,7 @@ class Pub():
             print 'using %s to edit files' % (os.getenv('EDITOR'))
 
     def backup_posts(self):
-        src = os.path.join(os.getcwd(), 'posts')
+        src = os.path.join(os.getcwd(), conf.POST_DIR)
         des = os.path.join(os.getcwd(), 'backups')
 
         os.system('rsync -ab %s %s' % (src, des))
